@@ -1,0 +1,134 @@
+package com.javarush.task.task20.task2025;
+
+import java.util.*;
+
+/* 
+Алгоритмы-числа
+*/
+
+public class Solution {
+
+    private static long[][] arrayOfDegrees = new long[10][20];
+
+    static {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 20; j++) {
+                arrayOfDegrees[i][j] = i;
+                for(int k = 0; k < j; k++) {
+                    arrayOfDegrees[i][j] = arrayOfDegrees[i][j] * i;
+                }
+            }
+        }/*
+        for (long[] longs : arrayOfDegrees) {
+            System.out.println(Arrays.toString(longs));
+        }*/
+    }
+
+    public static byte[] getBytesFromNum(long num) {
+        num = num - 1;
+        int lengthOfNum = String.valueOf(num).length();
+        byte[] longNumber = new byte[String.valueOf(num).length()];
+        short digit;
+        for (int i = 0; i < lengthOfNum; i++) {
+            digit = (short) (num%10);
+            longNumber[lengthOfNum - i - 1] = (byte) digit;
+            num /= 10;
+        }
+        return longNumber;
+    }
+
+    public static boolean decrement(byte[] bytesDigitFromNum) {
+        int index = 0;
+
+        while (index < bytesDigitFromNum.length && bytesDigitFromNum[index]  == 0) index++;
+
+        if(index + 1 == bytesDigitFromNum.length && bytesDigitFromNum[index] == 1) return false;
+
+        Arrays.fill(bytesDigitFromNum, 0, index + 1, (byte) (bytesDigitFromNum[index] - 1));
+
+        return true;
+    }
+
+    public static long checkToArmstrong(long numArgument) {
+        long result = 0;
+        long num = numArgument;
+        short digit;
+        long sum = 0;
+        short length = (short) String.valueOf(numArgument).length();
+        while (num != 0) {
+            digit = (short) (num%10);
+            sum += arrayOfDegrees[digit][length-1];
+            num/=10;
+            //System.out.println(digit + " " + num);
+        }
+        //System.out.println("sum=" + sum + "\tnumArgs=" + numArgument + "\t length=" + length);
+        if(sum == numArgument) result = sum;
+        return result;
+    }
+
+    public static long checkAndReturnValue(byte[] bytesDigitFromNum, short quantityOfZero) {
+        long result = 0;
+        long degrees = 0;
+        int length = bytesDigitFromNum.length - quantityOfZero;
+        for (int i = 0; i < length; i++) {
+            degrees = arrayOfDegrees[bytesDigitFromNum[i]][length-1];
+            if (degrees < 0) {
+                return 0;
+            }
+            result += degrees;
+        }
+        System.out.println( Arrays.toString(bytesDigitFromNum) + " length =" + length + " quantitiyOfZero = " + quantityOfZero + " result = " + result);
+        if(result > 1) {
+            result = checkToArmstrong(result);
+        }
+
+        return result;
+    }
+
+    public static TreeSet<Long> getTreeSetOfArmstrongNumber(long num) {
+        TreeSet<Long> result = new TreeSet<>();
+        byte[] bytesDigitFromNum = getBytesFromNum(num);
+        long armstrongNum;
+        while (decrement(bytesDigitFromNum)) {
+            short quantityOfZero = 0;
+            for (Byte byteIn : bytesDigitFromNum) if(byteIn == 0) quantityOfZero++;
+            for (int i = 0; i < quantityOfZero+1; i++) {
+                armstrongNum = checkAndReturnValue(bytesDigitFromNum, (short) i);
+                if(armstrongNum != 0) {
+                    result.add(armstrongNum);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static long[] getNumbers(long N) {
+        if(String.valueOf(N).length() > 19) throw  new IllegalArgumentException();
+        if(N < 0) throw  new IllegalArgumentException();
+        if(N < 1) return  null;
+        TreeSet<Long> treeSet = getTreeSetOfArmstrongNumber(N);
+        long[] result = null;
+        if(treeSet.size() != 0) {
+            result = new long[treeSet.size()];
+            int counter = 0;
+            for (Long num : treeSet) {
+                result[counter++] = num;
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        long a = System.currentTimeMillis();
+        System.out.println(Arrays.toString(getNumbers(1000)));
+        long b = System.currentTimeMillis();
+        System.out.println("memory " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (8 * 1024));
+        System.out.println("time = " + (b - a) / 1000);
+
+        a = System.currentTimeMillis();
+        //System.out.println(Arrays.toString(getNumbers(1000000)));
+        b = System.currentTimeMillis();
+        System.out.println("memory " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (8 * 1024));
+        System.out.println("time = " + (b - a) / 1000);
+    }
+}
