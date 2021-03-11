@@ -7,6 +7,7 @@ import java.util.*;
 */
 
 public class Solution {
+    public static long maxNumber;
 
     private static long[][] arrayOfDegrees = new long[10][20];
 
@@ -25,6 +26,7 @@ public class Solution {
     }
 
     public static byte[] getBytesFromNum(long num) {
+        maxNumber = num;
         num = num - 1;
         int lengthOfNum = String.valueOf(num).length();
         byte[] longNumber = new byte[String.valueOf(num).length()];
@@ -55,9 +57,12 @@ public class Solution {
         short digit;
         long sum = 0;
         short length = (short) String.valueOf(numArgument).length();
+        long degreesFromArray = 0;
         while (num != 0) {
             digit = (short) (num%10);
-            sum += arrayOfDegrees[digit][length-1];
+            degreesFromArray = arrayOfDegrees[digit][length-1];
+            if(degreesFromArray<0) return 0;
+            sum += degreesFromArray;
             num/=10;
             //System.out.println(digit + " " + num);
         }
@@ -70,14 +75,16 @@ public class Solution {
         long result = 0;
         long degrees = 0;
         int length = bytesDigitFromNum.length - quantityOfZero;
-        for (int i = 0; i < length; i++) {
+        if(length>18) return 0;
+        for (int i = 0; i < bytesDigitFromNum.length; i++) {
             degrees = arrayOfDegrees[bytesDigitFromNum[i]][length-1];
             if (degrees < 0) {
                 return 0;
             }
             result += degrees;
         }
-        System.out.println( Arrays.toString(bytesDigitFromNum) + " length =" + length + " quantitiyOfZero = " + quantityOfZero + " result = " + result);
+        //System.out.println( Arrays.toString(bytesDigitFromNum) + " length =" + length + " quantitiyOfZero = " + quantityOfZero + " result = " + result);
+        if(result >= maxNumber || String.valueOf(result).length()>18) return 0;
         if(result > 1) {
             result = checkToArmstrong(result);
         }
@@ -87,7 +94,7 @@ public class Solution {
 
     public static TreeSet<Long> getTreeSetOfArmstrongNumber(long num) {
         TreeSet<Long> result = new TreeSet<>();
-        byte[] bytesDigitFromNum = getBytesFromNum(num);
+        byte[] bytesDigitFromNum = getBytesFromNum(num); // get numArrayFromDigit - 1;
         long armstrongNum;
         while (decrement(bytesDigitFromNum)) {
             short quantityOfZero = 0;
@@ -103,9 +110,8 @@ public class Solution {
     }
 
     public static long[] getNumbers(long N) {
-        if(String.valueOf(N).length() > 19) throw  new IllegalArgumentException();
-        if(N < 0) throw  new IllegalArgumentException();
-        if(N < 1) return  null;
+        if(String.valueOf(N).length() > 19) return null;
+        if(N < 2) return  null;
         TreeSet<Long> treeSet = getTreeSetOfArmstrongNumber(N);
         long[] result = null;
         if(treeSet.size() != 0) {
@@ -119,14 +125,15 @@ public class Solution {
     }
 
     public static void main(String[] args) {
+        System.out.println(Long.MAX_VALUE);
         long a = System.currentTimeMillis();
-        System.out.println(Arrays.toString(getNumbers(1000)));
+        System.out.println(Arrays.toString(getNumbers(9000000000000000000L)));
         long b = System.currentTimeMillis();
         System.out.println("memory " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (8 * 1024));
         System.out.println("time = " + (b - a) / 1000);
 
         a = System.currentTimeMillis();
-        //System.out.println(Arrays.toString(getNumbers(1000000)));
+        System.out.println(Arrays.toString(getNumbers(1000000)));
         b = System.currentTimeMillis();
         System.out.println("memory " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (8 * 1024));
         System.out.println("time = " + (b - a) / 1000);
