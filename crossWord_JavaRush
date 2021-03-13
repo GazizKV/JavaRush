@@ -1,0 +1,264 @@
+package com.javarush.task.task20.task2027;
+
+import java.util.*;
+
+/* 
+Кроссворд
+*/
+
+public class Solution {
+    public static void main(String[] args) {
+        int[][] crossword = new int[][] {
+                {' ', 'd', 'l', 'r', 'o', 'w'},
+                {' ', 'r', ' ', ' ', 'r', ' '},
+                {' ', 'o', 'd', ' ', 'd', 'd'},
+                {'d', 'w', 'o', 'r', 'd', 'r'},
+                {'r', 'o', ' ', ' ', 'o', 'o'},
+                {'o', 'r', ' ', ' ', ' ', 'w'},
+                {'w', 'd', 'r', 'o', 'o', 'w'}
+        };
+        detectAllWords(crossword, "world", "word");
+
+        /*
+Ожидаемый результат
+home - (5, 3) - (2, 0)
+same - (1, 1) - (4, 1)
+         */
+    }
+
+    enum Direction {
+        LEFT,
+        LEFTUP,
+        UP,
+        UPRIGHT,
+        RIGHT,
+        RIGHTDOWN,
+        DOWN,
+        DOWNLEFT
+    }
+
+    public static boolean checkWholeWordInFindedDirection(int[][] crossword, int i, int j, byte[] bytesArrayFromWord, Direction direction) {
+        System.out.println("checkWholeWordInFindedDirection: i="+i+" j="+j+"bytesArraFromWord="+Arrays.toString(bytesArrayFromWord)+" direction="+direction);
+        boolean result = true;
+
+        switch (direction) {
+            case RIGHT:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i][j++] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case RIGHTDOWN:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i++][j++] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case DOWN:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i++][j] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case DOWNLEFT:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i++][j--] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case LEFT:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i][j--] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case LEFTUP:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i--][j--] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case UP:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i--][j] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            case UPRIGHT:
+                for (int k = 0; k < bytesArrayFromWord.length; k++) {
+                    if(crossword[i--][j++] != bytesArrayFromWord[k]) {
+                        result = false;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        System.out.println(result);
+        return result;
+    }
+
+    public static List<Direction> checkAndFindDirection(int[][] crossword, int i, int j, String word) {
+        List<Direction> directions = new ArrayList<>();
+        byte[] bytesArrayFromWord = word.getBytes();
+        int wordLength = bytesArrayFromWord.length - 1;
+        int height = crossword.length;
+        int width = crossword[0].length;
+        if(((i - wordLength) >= 0) && ((j - wordLength) >= 0)) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.LEFTUP)) {
+                directions.add(Direction.LEFTUP);
+            }
+        }
+        if( ( i-wordLength) >= 0 ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.UP)) {
+                directions.add(Direction.UP);
+            }
+        }
+        if( ((j + wordLength) < width) && ((i-wordLength) >= 0) ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.UPRIGHT)) {
+                directions.add(Direction.UPRIGHT);
+            }
+        }
+        if( ((j + wordLength) < width) ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.RIGHT)) {
+                directions.add(Direction.RIGHT);
+            }
+        }
+        if( ((j + wordLength)<width) && ((i + wordLength)<height) ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.RIGHTDOWN)) {
+                directions.add(Direction.RIGHTDOWN);
+            }
+        }
+        if( (i + wordLength) < height ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.DOWN)) {
+                directions.add(Direction.DOWN);
+            }
+        }
+        if( ((i + wordLength) < height) && ((j - wordLength) >= 0) ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.DOWNLEFT)) {
+                directions.add(Direction.DOWNLEFT);
+            }
+        }
+        if( ( j - wordLength) >= 0 ) {
+            if(checkWholeWordInFindedDirection(crossword, i, j, bytesArrayFromWord, Direction.LEFT)) {
+                directions.add(Direction.LEFT);
+            }
+        }
+        return directions;
+    }
+
+    public static void setToList(int i, int j, List<Word> list, Direction direction, String word) {
+        int wordLength = word.length() - 1;
+        switch (direction)
+        {
+            case UP:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j, i - wordLength);
+                break;
+            case DOWN:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j, i + wordLength);
+                break;
+            case LEFT:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j - wordLength, i);
+                break;
+            case RIGHT:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j + wordLength , i);
+                break;
+            case LEFTUP:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j - wordLength, i - wordLength);
+                break;
+            case UPRIGHT:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j + wordLength, i - wordLength);
+                break;
+            case DOWNLEFT:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j - wordLength, i + wordLength);
+                break;
+            case RIGHTDOWN:
+                list.add(new Word(word));
+                list.get(list.size() - 1).setStartPoint(j, i);
+                list.get(list.size() - 1).setEndPoint(j + wordLength, i + wordLength);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static List<Word> detectAllWords(int[][] crossword, String... words) {
+        List<Word> list = new ArrayList<>();
+        for (int i = 0; i < crossword.length; i++) {
+            for (int j = 0; j < crossword[i].length; j++) {
+                for (String str : words) {
+                    if(str.startsWith((Character.toString((char)crossword[i][j])))) {
+                        List<Direction> listOfDirections = checkAndFindDirection(crossword, i, j, str);
+                        if(listOfDirections.size() > 0) {
+                            for (Direction direction : listOfDirections) {
+                                setToList(i, j, list, direction, str);
+                            }
+                        }
+                    }
+                }/*
+                for (String str : words) {
+                    str = new StringBuilder(str).reverse().toString();
+                    if(str.startsWith((Character.toString((char)crossword[i][j])))) {
+                        List<Direction> listOfDirections = checkAndFindDirection(crossword, i, j, str);
+                        if(listOfDirections.size() > 0) {
+                            for (Direction direction : listOfDirections) {
+                                setToList(i, j, list, direction, str);
+                            }
+                        }
+                    }
+                }*/
+            }
+        }
+
+        for (Word word : list) System.out.println(word.toString());
+        return list;
+    }
+
+    public static class Word {
+        private String text;
+        private int startX;
+        private int startY;
+        private int endX;
+        private int endY;
+
+        public Word(String text) {
+            this.text = text;
+        }
+
+        public void setStartPoint(int i, int j) {
+            startX = i;
+            startY = j;
+        }
+
+        public void setEndPoint(int i, int j) {
+            endX = i;
+            endY = j;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s - (%d, %d) - (%d, %d)", text, startX, startY, endX, endY);
+        }
+    }
+}
